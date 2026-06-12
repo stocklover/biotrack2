@@ -134,30 +134,6 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
-                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3 border-sky-500/20">
-                    <div class="p-2 sm:p-3 bg-sky-500/10 text-sky-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-eye"></i></div>
-                    <div>
-                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">실시간 접속자</p>
-                        <h3 class="text-base sm:text-2xl font-bold mt-0.5 text-sky-300" id="statLiveCount">1</h3>
-                    </div>
-                </div>
-                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3 border-pink-500/20">
-                    <div class="p-2 sm:p-3 bg-pink-500/10 text-pink-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-user-check"></i></div>
-                    <div>
-                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">오늘 방문자수</p>
-                        <h3 class="text-base sm:text-2xl font-bold mt-0.5 text-pink-300" id="statTodayCount">0</h3>
-                    </div>
-                </div>
-                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3 border-violet-500/20">
-                    <div class="p-2 sm:p-3 bg-violet-500/10 text-violet-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-users"></i></div>
-                    <div>
-                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">총 방문자수</p>
-                        <h3 class="text-base sm:text-2xl font-bold mt-0.5 text-violet-300" id="statTotalCount">0</h3>
-                    </div>
-                </div>
-            </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="glass-panel p-4 sm:p-6 rounded-xl lg:col-span-2 flex flex-col justify-between">
                     <div>
@@ -217,7 +193,31 @@
                 </div>
             </div>
 
-            <footer class="mt-8 border-t border-gray-800/80 pt-6 px-1">
+            <div class="grid grid-cols-3 gap-3 pt-2">
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-sky-500/10 bg-sky-950/5">
+                    <div class="p-2 bg-sky-500/10 text-sky-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-eye"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">실시간 접속자</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-sky-300" id="statLiveCount">1</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-pink-500/10 bg-pink-950/5">
+                    <div class="p-2 bg-pink-500/10 text-pink-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-user-check"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">오늘 방문자수</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-pink-300" id="statTodayCount">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-violet-500/10 bg-violet-950/5">
+                    <div class="p-2 bg-violet-500/10 text-violet-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">총 방문자수</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-violet-300" id="statTotalCount">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="mt-4 border-t border-gray-800/80 pt-6 px-1">
                 <div class="glass-panel p-4 rounded-xl border border-gray-800 bg-gray-950/30 text-[11px] text-gray-500 space-y-3 leading-relaxed">
                     <div class="flex items-center gap-1.5 font-bold text-gray-400 text-xs uppercase tracking-wide">
                         <i class="fa-solid fa-scale-balanced text-indigo-400"></i> 
@@ -328,13 +328,12 @@
 
         window.onload = function() {
             updateStaticUI();
-            initVisitorCounters(); // 방문자 카운터 초기화
+            initVisitorCounters(); 
             setTimeout(() => {
                 fetchClinicalData();
             }, 300);
         };
 
-        // 방문자 카운터 처리 로직 (LocalStorage 기반)
         function initVisitorCounters() {
             try {
                 const today = new Date().toISOString().split('T')[0];
@@ -352,10 +351,8 @@
                 document.getElementById('statTodayCount').innerText = visitData.todayCount.toLocaleString();
                 document.getElementById('statTotalCount').innerText = visitData.totalCount.toLocaleString();
                 
-                // 실시간 접속자 (새로고침 시 1~3명 내외 랜덤)
                 document.getElementById('statLiveCount').innerText = (Math.floor(Math.random() * 3) + 1).toLocaleString();
             } catch (e) {
-                // 시크릿 모드 등으로 LocalStorage 접근 불가 시 예외처리
                 document.getElementById('statTodayCount').innerText = "1";
                 document.getElementById('statTotalCount').innerText = "1";
                 document.getElementById('statLiveCount').innerText = "1";
