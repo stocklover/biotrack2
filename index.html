@@ -626,6 +626,9 @@
             const searchType = document.getElementById('searchType').value;
             if (!rawInput) return alert(i18n[currentLang].alertEmpty);
 
+            // 💡 [핵심 추가] 아티클 화면이든 어디든, 검색을 시작하면 무조건 대시보드 탭으로 화면을 전환합니다.
+    switchView('dashboard');
+
             isSearching = true;
             const loadingState = document.getElementById('loadingState');
             const dashboardContent = document.getElementById('dashboardContent');
