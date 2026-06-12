@@ -196,7 +196,8 @@
     </main>
 
     <main id="blogView" class="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6 hidden">
-        <div class="glass-panel p-6 rounded-xl space-y-5">
+        
+        <div id="articleListSection" class="glass-panel p-6 rounded-xl space-y-5">
             <h2 class="text-base font-bold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
                 <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
             </h2>
@@ -204,26 +205,38 @@
             <article class="p-4.5 bg-gray-950/50 rounded-xl border border-gray-800/60 space-y-2.5">
                 <h3 class="font-semibold text-indigo-300 text-sm sm:text-base leading-snug">차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석</h3>
                 <p class="text-[10px] text-gray-400">등록일자: 2026-06-13</p>
-                <p class="text-xs text-gray-300 leading-relaxed">
-                    기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 전 세계 빅파마 및 바이오텍 파이프라인 전반에서 뚜렷하게 관찰되고 있습니다. 링커 기술의 안정성에 따라 약물 전달력(DAR, Drug-to-Antibody Ratio)의 격차가 발생하며, 표적 암세포 사멸 후 주변 세포까지 타격하는 Bystander 효과의 중요성이 더욱 커지고 있습니다.
+                <p class="text-xs text-gray-300 leading-relaxed line-clamp-3">
+                    기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 전 세계 빅파마 및 바이오텍 파이프라인 전반에서 뚜렷하게 관찰되고 있습니다. 링커 기술의 안정성에 따라 약물 전달력(DAR, Drug-to-Antibody Ratio)의 격차가 발생하며...
                 </p>
                 <div class="pt-2">
-                    <a href="#" class="text-[10px] text-indigo-400 font-bold bg-indigo-950/40 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors">전문 읽기 &rarr;</a>
+                    <button onclick="viewArticleDetail(1)" class="text-[10px] text-indigo-400 font-bold bg-indigo-950/40 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors cursor-pointer">전문 읽기 &rarr;</button>
                 </div>
             </article>
 
             <article class="p-4.5 bg-gray-950/50 rounded-xl border border-gray-800/60 space-y-2.5">
                 <h3 class="font-semibold text-indigo-300 text-sm sm:text-base leading-snug">고형암 타깃 클라우딘(CLDN18.2) 항체 치료제 임상 동향</h3>
                 <p class="text-[10px] text-gray-400">등록일자: 2026-06-14</p>
-                <p class="text-xs text-gray-300 leading-relaxed">
-                    위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2(Claudin-18.2)는 매우 매력적인 바이오마커로 자리 잡고 있습니다. 아스텔라스의 졸베툭시맙(Zolbetuximab)이 선두 주자로 임상 3상 데이터를 입증해 낸 이후, 이를 타깃하는 다양한 이중항체 및 ADC 형태의 신약 파이프라인이 국내외 바이오텍에서 활발히 설계되고 있습니다.
+                <p class="text-xs text-gray-300 leading-relaxed line-clamp-3">
+                    위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2(Claudin-18.2)는 매우 매력적인 바이오마커로 자리 잡고 있습니다. 아스텔라스의 졸베툭시맙(Zolbetuximab)이 선두 주자로 임상 3상 데이터를 입증해 낸 이후...
                 </p>
                 <div class="pt-2">
-                    <a href="#" class="text-[10px] text-indigo-400 font-bold bg-indigo-950/40 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors">전문 읽기 &rarr;</a>
+                    <button onclick="viewArticleDetail(2)" class="text-[10px] text-indigo-400 font-bold bg-indigo-950/40 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors cursor-pointer">전문 읽기 &rarr;</button>
                 </div>
             </article>
-            
         </div>
+
+        <div id="articleDetailSection" class="glass-panel p-6 rounded-xl space-y-5 hidden">
+            <button onclick="backToArticleList()" class="text-[10px] text-gray-400 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
+            </button>
+            
+            <article class="space-y-4">
+                <h2 id="detailTitle" class="text-lg font-bold text-indigo-300 leading-snug"></h2>
+                <p id="detailDate" class="text-[10px] text-gray-500 border-b border-gray-800 pb-3"></p>
+                <div id="detailContent" class="text-xs text-gray-300 leading-relaxed space-y-4"></div>
+            </article>
+        </div>
+
     </main>
 
     <script>
@@ -231,6 +244,44 @@
         let globalChartInstance = null;
         let currentLang = 'ko'; 
         let isSearching = false; 
+
+        const articlesDB = {
+            1: {
+                title: "차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석",
+                date: "등록일자: 2026-06-13",
+                content: `
+                    <p>기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 전 세계 빅파마 및 바이오텍 파이프라인 전반에서 뚜렷하게 관찰되고 있습니다.</p>
+                    <p>링커(Linker) 기술의 안정성에 따라 약물 전달력(DAR, Drug-to-Antibody Ratio)의 격차가 발생하며, 표적 암세포 사멸 후 주변 암세포까지 타격하는 Bystander(방관자) 효과의 중요성이 더욱 커지고 있는 추세입니다.</p>
+                    <p>향후 암세포 표면에만 특이적으로 작용하고 정상 세포에는 영향을 최소화하는 절단형(Cleavable) 링커 기술이 ADC 상용화의 핵심 열쇠가 될 것으로 전망됩니다.</p>
+                `
+            },
+            2: {
+                title: "고형암 타깃 클라우딘(CLDN18.2) 항체 치료제 임상 동향",
+                date: "등록일자: 2026-06-14",
+                content: `
+                    <p>위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2(Claudin-18.2)는 매우 매력적인 바이오마커로 자리 잡고 있습니다.</p>
+                    <p>아스텔라스의 졸베툭시맙(Zolbetuximab)이 선두 주자로 임상 3상 데이터를 성공적으로 입증해 낸 이후, 이를 타깃하는 다양한 이중항체 및 ADC 형태의 신약 파이프라인이 국내외 바이오텍에서 활발히 설계되고 있습니다.</p>
+                    <p>특히 밀도가 높은 췌장암 미세환경을 극복하기 위한 병용 투여 요법이 임상 디자인의 주류를 이루고 있습니다.</p>
+                `
+            }
+        };
+
+        function viewArticleDetail(articleId) {
+            const article = articlesDB[articleId];
+            if (!article) return;
+
+            document.getElementById('detailTitle').innerText = article.title;
+            document.getElementById('detailDate').innerText = article.date;
+            document.getElementById('detailContent').innerHTML = article.content;
+
+            document.getElementById('articleListSection').classList.add('hidden');
+            document.getElementById('articleDetailSection').classList.remove('hidden');
+        }
+
+        function backToArticleList() {
+            document.getElementById('articleListSection').classList.remove('hidden');
+            document.getElementById('articleDetailSection').classList.add('hidden');
+        }
 
         const nonCorporateKeywords = [
             'university', 'univ', 'hospital', 'medical center', 'clinic', 'institute', 'nih', 
@@ -246,12 +297,14 @@
             }, 300);
         };
 
-        // 🎛️ [추가] SPA 뷰(대시보드 vs 블로그) 전환 함수
         function switchView(viewName) {
             const dashView = document.getElementById('dashboardView');
             const blogView = document.getElementById('blogView');
             const dashTab = document.getElementById('tabDashboard');
             const blogTab = document.getElementById('tabBlog');
+
+            // 블로그 뷰 이동 시 목록으로 항상 초기화
+            backToArticleList();
 
             if (viewName === 'dashboard') {
                 dashView.classList.remove('hidden');
@@ -298,7 +351,6 @@
             }
         }
 
-        // 🔬 [업데이트 완료] 타깃 항원, 독성 페이로드, ISAC까지 완벽 포착하는 v6.8 고도화 ADC 판정 알고리즘
         function detectModality(study) {
             const protocol = study.protocolSection;
             if (!protocol) return { type: '기타/합성신약', class: 'bg-gray-800 text-gray-400 border-gray-700' };
@@ -325,27 +377,22 @@
                 return { type: 'ADC 치료제', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
             }
 
-            // 2. 유전자(RNA) 치료제
             if (combinedText.includes('mrna') || combinedText.includes('sirna') || combinedText.includes('rnai') || combinedText.includes('antisense') || combinedText.includes('oligonucleotide') || combinedText.includes('aso') || combinedText.includes('ribozyme') || combinedText.includes('trans-splicing') || combinedText.includes('rna editing') || combinedText.includes('messenger rna') || combinedText.includes('short interfering')) {
                 return { type: '유전자(RNA)', class: 'bg-teal-500/20 text-teal-300 border-teal-500/40' };
             }
 
-            // 3. 유전자(DNA) 치료제
             if (combinedText.includes('gene therapy') || combinedText.includes('crispr') || combinedText.includes('cas9') || combinedText.includes('gene editing') || combinedText.includes('vector') || combinedText.includes('lentiviral') || combinedText.includes('adenoviral') || combinedText.includes('adeno-associated') || combinedText.includes('aav') || combinedText.includes('plasmid') || combinedText.includes('dna therapy')) {
                 return { type: '유전자(DNA)', class: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
             }
 
-            // 4. PROTAC / TPD
             if (combinedText.includes('protac') || combinedText.includes('targeted protein degradation') || combinedText.includes('tpd') || combinedText.includes('degrader') || combinedText.includes('molecular glue') || combinedText.includes('e3 ligase') || combinedText.includes('ubiquitin') || (combinedText.includes('chimeric') && combinedText.includes('degradation'))) {
                 return { type: 'PROTAC / TPD', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
             }
 
-            // 5. 세포 치료제
             if (combinedText.includes('car-t') || combinedText.includes('car-nk') || combinedText.includes('cell therapy') || combinedText.includes('t-cell') || combinedText.includes('nk cell') || combinedText.includes('stem cell') || combinedText.includes('autologous') || combinedText.includes('allogeneic')) {
                 return { type: '세포 치료제', class: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40' };
             }
 
-            // 6. 항체 치료제
             if (combinedText.includes('antibody') || combinedText.includes('monoclonal') || combinedText.includes('bispecific') || combinedText.includes('trispecific') || combinedText.includes('mab') || combinedText.includes('scfv')) {
                 return { type: '항체 치료제', class: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' };
             }
