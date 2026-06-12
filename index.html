@@ -326,9 +326,27 @@
             '협회', '병원', '대학교', '연구소', '센터', '의료원', '학회', '정부'
         ];
 
+        // 🛠️ 방법 1 적용 완료: window.onload에서 개발자 환경 식별 후 분기 처리
         window.onload = function() {
             updateStaticUI();
-            initVisitorCounters(); 
+            
+            const isLocal = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' || 
+                            window.location.protocol === 'file:';
+                            
+            if (!isLocal) {
+                // 실제 배포 도메인 접속 시에만 카운팅 로직 가동
+                initVisitorCounters(); 
+            } else {
+                console.log("공지: 개발자 로컬 테스트 환경이므로 방문자수 카운트를 생략합니다.");
+                try {
+                    const visitData = JSON.parse(localStorage.getItem('biotrack_visits') || '{"todayCount":0,"totalCount":0}');
+                    document.getElementById('statTodayCount').innerText = (visitData.todayCount || 0).toLocaleString();
+                    document.getElementById('statTotalCount').innerText = (visitData.totalCount || 0).toLocaleString();
+                    document.getElementById('statLiveCount').innerText = "1";
+                } catch(e){}
+            }
+
             setTimeout(() => {
                 fetchClinicalData();
             }, 300);
