@@ -231,63 +231,61 @@
         </div>
     </main>
 
-    <main id="blogView" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 hidden">
+<main id="blogView" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 hidden">
         
     <div id="articleListSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6">
-    <h2 class="text-lg sm:text-xl font-bold text-white border-b border-gray-800 pb-4 flex items-center gap-2.5">
-        <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
-    </h2>
-    
-    <div id="articlesContainer" class="space-y-4">
+        <h2 class="text-lg sm:text-xl font-bold text-white border-b border-gray-800 pb-4 flex items-center gap-2.5">
+            <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
+        </h2>
         
-        <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(1)">
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2 text-[11px] text-gray-500">
-                    <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-medium">ADC 분석</span>
-                    <span>•</span>
-                    <span>2026-06-13</span>
+        <div id="articlesContainer" class="space-y-4">
+            <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(1)">
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                        <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-medium">ADC 분석</span>
+                        <span>•</span>
+                        <span>2026-06-13</span>
+                    </div>
+                    <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
+                        차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                        기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 뚜렷하게 관찰되고 있습니다. 이에 따른 바이오텍들의 파이프라인 경쟁력을 점검합니다.
+                    </p>
                 </div>
-                <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
-                    차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
-                    기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 뚜렷하게 관찰되고 있습니다. 이에 따른 바이오텍들의 파이프라인 경쟁력을 점검합니다.
-                </p>
-            </div>
-        </article>
-
-        <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(2)">
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2 text-[11px] text-gray-500">
-                    <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">임상 동향</span>
-                    <span>•</span>
-                    <span>2026-06-12</span>
-                </div>
-                <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
-                    글로벌 클라우딘18.2(CLDN18.2) 타깃 치료제 개발 현황과 전망
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
-                    난치성 고형암에서 높은 발현도를 보이는 CLDN18.2 모달리티의 글로벌 임상 데이터를 비교 분석하고, 향후 시장 진입 가능성이 높은 독보적인 플랫폼 기술을 가진 기업들을 살펴봅니다.
-                </p>
-            </div>
-        </article>
-
-    </div>
-</div>
-
-        <div id="articleDetailSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6 hidden">
-            <button onclick="backToArticleList()" class="text-xs text-gray-400 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
-            </button>
-            
-            <article class="space-y-5">
-                <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-indigo-300 leading-snug border-b border-gray-800/50 pb-4"></h2>
-                <p id="detailDate" class="text-xs text-gray-500"></p>
-                <div id="detailContent" class="text-base sm:text-lg text-gray-300 leading-loose space-y-6"></div>
             </article>
         </div>
+    </div>
 
-    </main>
+    <div id="articleDetailSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+            <button onclick="hideArticleDetail()" class="flex items-center gap-2 text-xs sm:text-sm text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
+            </button>
+            <span class="text-xs text-gray-500">2026-06-13</span>
+        </div>
+
+        <article class="prose prose-invert max-w-none space-y-6">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석
+            </h2>
+            <div class="text-sm sm:text-base text-gray-300 space-y-5 leading-relaxed">
+                <p>기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 뚜렷하게 관찰되고 있습니다. 이는 고형암 표적 시 약물 전달력과 암세포 사멸 능력을 극대화하기 위한 전략입니다.</p>
+                
+                <div class="my-6">
+                    <img src="./images/chart1.png" alt="차트" class="w-full h-auto rounded-xl border border-gray-800 shadow-lg">
+                    <p class="text-center text-xs text-gray-500 mt-2">[그림 1] 글로벌 바이오 마켓의 페이로드 세대교체 모식도</p>
+                </div>
+
+                <h4 class="text-base sm:text-lg font-bold text-indigo-400 mt-8 mb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-4 bg-indigo-500 rounded-sm"></span> 링커 기술의 안정성과 Bystander 효과
+                </h4>
+                <p>링커(Linker) 기술의 안정성에 따라 약물 전달력(DAR)의 격차가 발생하며, 주변 암세포까지 함께 타격하는 Bystander 효과의 중요성이 갈수록 커지고 있습니다. 글로벌 빅파마들은 독점적 해자(Moat)를 구축하기 위해 고유의 링커 플랫폼을 고도화하는 추세입니다.</p>
+            </div>
+        </article>
+    </div>
+
+</main>
 
     <script>
         let filteredCorporateData = []; 
