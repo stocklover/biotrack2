@@ -932,6 +932,33 @@
 
             tableBody.innerHTML = translatedRows.join('');
         }
+
+        // 💡 가장 확실한 스타일 직접 제어 방식으로 변경
+function showArticleDetail(id) {
+    var list = document.getElementById('articleListSection');
+    var detail = document.getElementById('articleDetailSection');
+    
+    if (list) list.style.display = 'none'; // 목록 숨기기
+    if (detail) {
+        detail.style.setProperty('display', 'block', 'important'); // 본문 강제로 보이기
+        detail.classList.remove('hidden');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideArticleDetail() {
+    var list = document.getElementById('articleListSection');
+    var detail = document.getElementById('articleDetailSection');
+    
+    if (detail) {
+        detail.style.setProperty('display', 'none', 'important'); // 본문 숨기기
+        detail.classList.add('hidden');
+    }
+    if (list) {
+        list.style.setProperty('display', 'block', 'important'); // 목록 보이기
+        list.classList.remove('hidden');
+    }
+}
     </script>
 </body>
 </html>
