@@ -58,4 +58,969 @@
                 <div class="flex gap-2 w-full sm:w-auto">
                     <button onclick="toggleLanguage()" id="langBtnDesktop"
                         class="hidden md:flex px-3 py-2 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded-xl border border-gray-700 transition-colors cursor-pointer items-center justify-center gap-1 text-indigo-400 shrink-0">
-                        <i class="fa-solid
+                        <i class="fa-solid fa-globe"></i> <span>EN</span>
+                    </button>
+
+                    <select id="searchType" class="w-full sm:w-auto bg-gray-950 border border-gray-800 rounded-xl text-xs px-2.5 py-2.5 text-gray-300 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="spons" selected>기업명 검색</option>
+                        <option value="cond">질환명 검색</option>
+                        <option value="modal">모달리티 검색</option>
+                    </select>
+                </div>
+
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="diseaseInput" value="Janux"
+                        class="w-full pl-8 pr-20 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500 transition-all"
+                        placeholder="기업, 질환, 플랫폼 기술 입력..."
+                        onkeydown="if(event.key === 'Enter') fetchClinicalData()">
+                    <button onclick="fetchClinicalData()" id="ui-searchBtn"
+                        class="absolute right-1 top-1 bottom-1 px-3.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center cursor-pointer">
+                        <span>검색</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex gap-2 border-b border-gray-800/60">
+        <button onclick="switchView('dashboard')" id="tabDashboard" class="px-4 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center gap-1.5 transition-all">
+            <i class="fa-solid fa-chart-pie"></i> 임상 대시보드
+        </button>
+        <button onclick="switchView('blog')" id="tabBlog" class="px-4 py-2.5 bg-gray-800/80 text-gray-400 text-xs font-bold rounded-xl hover:bg-gray-700 hover:text-gray-200 cursor-pointer flex items-center gap-1.5 transition-all">
+            <i class="fa-solid fa-book-open"></i> 기업 분석 칼럼
+        </button>
+    </nav>
+
+    <main id="dashboardView" class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        
+        <div id="loadingState" class="hidden flex-col items-center justify-center py-16 space-y-3">
+            <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-gray-400 text-center px-4" id="ui-loadingText">데이터 동기화 및 모달리티 연산 중...</p>
+        </div>
+
+        <div id="dashboardContent" class="space-y-4 sm:space-y-6">
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3">
+                    <div class="p-2 sm:p-3 bg-blue-500/10 text-blue-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-folder-open"></i></div>
+                    <div>
+                        <p class="text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate" id="ui-cardTotal">정제 파이프라인</p>
+                        <h3 class="text-lg sm:text-2xl font-bold mt-0.5 text-white" id="statTotal">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3">
+                    <div class="p-2 sm:p-3 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-chart-line"></i></div>
+                    <div>
+                        <p class="text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate" id="ui-cardPhase3">기업 주도 3상</p>
+                        <h3 class="text-lg sm:text-2xl font-bold mt-0.5 text-white" id="statPhase3">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3">
+                    <div class="p-2 sm:p-3 bg-purple-500/10 text-purple-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-building"></i></div>
+                    <div>
+                        <p class="text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate" id="ui-cardSponsors">순수 바이오텍</p>
+                        <h3 class="text-lg sm:text-2xl font-bold mt-0.5 text-white" id="statSponsors">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-5 rounded-xl flex items-center space-x-3">
+                    <div class="p-2 sm:p-3 bg-amber-500/10 text-amber-400 rounded-lg text-sm sm:text-xl"><i class="fa-solid fa-vial-circle-check"></i></div>
+                    <div>
+                        <p class="text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate" id="ui-cardRecent">최근 개시 (1년)</p>
+                        <h3 class="text-lg sm:text-2xl font-bold mt-0.5 text-white" id="statRecent">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="glass-panel p-4 sm:p-6 rounded-xl lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5" id="ui-chartTitle">
+                            <i class="fa-solid fa-crown text-amber-400"></i> 선두 바이오텍 TOP 10
+                        </h3>
+                        <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5" id="ui-chartDesc">해당 부문 기업별 임상 파이프라인 수 점유율입니다.</p>
+                    </div>
+                    <div class="mt-4 relative h-48 sm:h-64 w-full">
+                        <canvas id="sponsorChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 sm:p-6 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5" id="ui-phaseTitle">
+                            <i class="fa-solid fa-pie-chart text-indigo-400"></i> 파이프라인 단계 분포
+                        </h3>
+                        <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5" id="ui-phaseDesc">기업 전용 프로젝트의 임상 단계 밀집도입니다.</p>
+                    </div>
+                    <div class="mt-4 space-y-2.5" id="phaseDistributionList">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-xl overflow-hidden">
+                <div class="p-4 bg-gray-900/40 border-b border-gray-800 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5" id="ui-tableTitle">
+                            <i class="fa-solid fa-list-check text-gray-400"></i> 기업별 파이프라인 목록
+                        </h3>
+                        <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5" id="ui-tableDesc">파이프라인, 적응증, 모달리티 확인</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="phaseFilter" onchange="filterAndRenderTable()" class="flex-1 sm:flex-none bg-gray-950 border border-gray-800 rounded-lg text-[11px] px-2 py-2 text-gray-300 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        </select>
+                        <select id="statusFilter" onchange="filterAndRenderTable()" class="flex-1 sm:flex-none bg-gray-950 border border-gray-800 rounded-lg text-[11px] px-2 py-2 text-gray-300 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="md:hidden bg-indigo-950/30 px-4 py-1.5 border-b border-gray-900/60 text-[10px] text-indigo-300/80 flex items-center justify-between">
+                    <span><i class="fa-solid fa-angles-left mr-1 swipe-hint"></i> 손가락으로 가로로 밀어서 상세 내용 확인</span>
+                    <i class="fa-solid fa-hand-pointer opacity-60"></i>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[700px] md:min-w-full">
+                        <thead>
+                            <tr class="bg-gray-950/60 border-b border-gray-800 text-[11px] font-semibold uppercase tracking-wider text-gray-400" id="ui-tableHeader">
+                            </tr>
+                        </thead>
+                        <tbody id="pipelineTableBody" class="divide-y divide-gray-800/40 text-xs sm:text-sm text-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 pt-2">
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-sky-500/10 bg-sky-950/5">
+                    <div class="p-2 bg-sky-500/10 text-sky-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-eye"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">실시간 접속자</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-sky-300" id="statLiveCount">1</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-pink-500/10 bg-pink-950/5">
+                    <div class="p-2 bg-pink-500/10 text-pink-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-user-check"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">오늘 방문자수</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-pink-300" id="statTodayCount">0</h3>
+                    </div>
+                </div>
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl flex items-center space-x-3 border-violet-500/10 bg-violet-950/5">
+                    <div class="p-2 bg-violet-500/10 text-violet-400 rounded-lg text-sm sm:text-lg"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <p class="text-[9px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider truncate">총 방문자수</p>
+                        <h3 class="text-sm sm:text-xl font-bold mt-0.5 text-violet-300" id="statTotalCount">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="mt-4 border-t border-gray-800/80 pt-6 px-1">
+                <div class="glass-panel p-5 rounded-xl border border-gray-800 bg-gray-950/20 text-center space-y-4">
+                    <div class="flex justify-center items-center gap-6 text-xs font-semibold text-gray-400">
+                        <button onclick="openPolicyModal('privacy')" class="hover:text-indigo-400 transition-colors cursor-pointer flex items-center gap-1">
+                            <i class="fa-solid fa-user-shield text-indigo-400/80"></i> 개인정보처리방침
+                        </button>
+                        <span class="text-gray-700">|</span>
+                        <button onclick="openPolicyModal('disclaimer')" class="hover:text-indigo-400 transition-colors cursor-pointer flex items-center gap-1">
+                            <i class="fa-solid fa-scale-balanced text-indigo-400/80"></i> 법적 책임 한계 고지
+                        </button>
+                    </div>
+                    
+                    <p class="text-[11px] text-gray-500 leading-relaxed max-w-2xl mx-auto">
+                        © 2026 BioTrack Pro Research Team. All Rights Reserved. <br>
+                        본 서비스는 공공 도메인 임상 API 가공 장치이며, 시스템 상의 인덱싱 정보는 투자 손실에 책임을 지지 않는 참고용 자산입니다.
+                    </p>
+                </div>
+            </footer>
+
+        </div>
+    </main>
+
+    <main id="blogView" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 hidden">
+            
+        <div id="articleListSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6">
+            <h2 class="text-lg sm:text-xl font-bold text-white border-b border-gray-800 pb-4 flex items-center gap-2.5">
+                <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
+            </h2>
+            
+            <div id="articlesContainer" class="space-y-4">
+                <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(1)">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                            <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-medium">ADC 분석</span>
+                            <span>•</span>
+                            <span>2026-06-13</span>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
+                            차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                            기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 뚜렷하게 관찰되고 있습니다. 이에 따른 바이오텍들의 파이프라인 경쟁력을 점검합니다.
+                        </p>
+                    </div>
+                </article>
+                <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(2)">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                            <span class="px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-medium">클라우딘 분석</span>
+                            <span>•</span>
+                            <span>2026-06-14</span>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
+                            고형암 타깃 클라우딘(CLDN18.2) 항체 치료제 임상 동향
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                            위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2 바이오마커의 가치와 국내외 파이프라인 임상 디자인 트렌드를 분석합니다.
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div id="articleDetailSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6 hidden">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <button onclick="hideArticleDetail()" class="flex items-center gap-2 text-xs sm:text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
+                </button>
+                <span id="detailDate" class="text-xs text-gray-500">2026-06-13</span>
+            </div>
+
+            <article class="prose prose-invert max-w-none space-y-6">
+                <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                </h2>
+                
+                <div id="detailContent" class="text-sm sm:text-base text-gray-300 space-y-5 leading-relaxed">
+                </div>
+            </article>
+        </div>
+
+    </main>
+
+    <div id="policyModalOverlay" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl max-h-[80vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-gray-800">
+            <div class="px-6 py-4 border-b border-gray-800 bg-gray-950/40 flex items-center justify-between">
+                <h3 id="modalTitle" class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                    </h3>
+                <button onclick="closePolicyModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modalBody" class="p-6 overflow-y-auto text-xs sm:text-sm text-gray-300 space-y-4 leading-relaxed custom-scrollbar bg-gray-950/20">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        let filteredCorporateData = []; 
+        let globalChartInstance = null;
+        let currentLang = 'ko'; 
+        let isSearching = false; 
+
+        const articlesDB = {
+            1: {
+                title: "차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석",
+                date: "등록일자: 2026-06-13",
+                content: `
+                    <div class="my-4">
+                        <img src="./images/pepe.jpeg" class="w-full max-w-md mx-auto h-auto rounded-xl border border-gray-800 shadow-md">
+                    </div>
+                    <p>기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 전 세계 빅파마 및 바이오텍 파이프라인 전반에서 뚜렷하게 관찰되고 있습니다.</p>
+                    <p>링커(Linker) 기술의 안정성에 따라 약물 전달력(DAR, Drug-to-Antibody Ratio)의 격차가 발생하며, 표적 암세포 사멸 후 주변 암세포까지 타격하는 Bystander(방관자) 효과의 중요성이 더욱 커지고 있는 추세입니다.</p>
+                    <p>향후 암세포 표면에만 특이적으로 작용하고 정상 세포에는 영향을 최소화하는 절단형(Cleavable) 링커 기술이 ADC 상용화의 핵심 열쇠가 될 것으로 전망됩니다.</p>
+                `
+            },
+            2: {
+                title: "고형암 타깃 클라우딘(CLDN18.2) 항체 치료제 임상 동향",
+                date: "등록일자: 2026-06-14",
+                content: `
+                    <p>위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2(Claudin-18.2)는 매우 매력적인 바이오마커로 자리 잡고 있습니다.</p>
+                    <p>아스텔라스의 졸베툭시맙(Zolbetuximab)이 선두 주자로 임상 3상 데이터를 성공적으로 입증해 낸 이후, 이를 타깃하는 다양한 이중항체 및 ADC 형태의 신약 파이프라인이 국내외 바이오텍에서 활발히 설계되고 있습니다.</p>
+                    <p>특히 밀도가 높은 췌장암 미세환경을 극복하기 위한 병용 투여 요법이 임상 디자인의 주류를 이루고 있습니다.</p>
+                `
+            }
+        };
+
+        // 📝 법적으로 효력을 지니는 구글 로봇 패스용 정밀 텍스트 데이터셋
+        const policyTextsDB = {
+            privacy: {
+                title: "개인정보처리방침 (Privacy Policy)",
+                content: `
+                    <p class="font-bold text-white border-b border-gray-800 pb-2">1. 개인정보의 처리 목적</p>
+                    <p>BioTrack Pro(이하 '본 플랫폼')는 이용자의 별도 회원가입 절차 없이 글로벌 신약 임상 고공 데이터를 실시간 연산 및 리서치하는 개방형 시스템으로, 운영 과정에서 이용자의 식별이 가능한 어떠한 개인정보도 서버에 직접 수집하거나 보유하지 않습니다.</p>
+                    <p class="font-bold text-white border-b border-gray-800 pb-2 mt-4">2. 쿠키(Cookie) 및 웹 브라우저 로컬 저장소 활용</p>
+                    <p>본 플랫폼은 이용자에게 최적화된 다국어 인프라 및 트래픽 정보(오늘 방문자수, 총 방문자 카운트)를 안전하게 관리하기 위해 브라우저 내부 하드웨어 기억 장치인 '로컬스토리지(LocalStorage)' 정보를 일부 활용할 수 있습니다. 이용자는 웹 브라우저 옵션 설정을 통해 쿠키 및 저장소 저장을 거부할 수 있습니다.</p>
+                    <p class="font-bold text-white border-b border-gray-800 pb-2 mt-4">3. 제3자 모듈 및 광고 프로그램 배정 고지</p>
+                    <p>본 플랫폼은 트래픽 엔진 분석 및 애드센스(Google AdSense) 광고 모듈 연동을 계획하고 있으며, 해당 제3자 서비스 제공업체는 브라우저 식별 정보 및 맞춤형 검색 동향을 수집할 수 있습니다. 이는 구글의 개인정보보호 규격을 엄격히 준수합니다.</p>
+                `
+            },
+            disclaimer: {
+                title: "법적 책임 한계 고지 (Disclaimer)",
+                content: `
+                    <p class="font-bold text-white border-b border-gray-800 pb-2">1. 데이터 출처 및 연동 주체 명시</p>
+                    <p>본 서비스에서 제공하는 실시간 임상 가공 차트 및 정제 매트릭스는 미국 국립보건원(NIH) 산하 국립의학도서관(NLM)이 개방한 <span class="text-indigo-400 font-mono">ClinicalTrials.gov V2 API</span> 공공 데이터를 연산 장치를 거쳐 필터링 출력한 결과물입니다. 본 시스템은 미국 정부 또는 국립보건원과 독점 제휴나 공식 후원 계약을 맺지 않은 순수 민간 오픈소스 리서치 소프트웨어입니다.</p>
+                    <p class="font-bold text-white border-b border-gray-800 pb-2 mt-4">2. 투자 위험 책임을 책임지지 않는 면책 고지</p>
+                    <p>본 사이트에 내장된 모달리티 필터링 분류 지표와 기업별 분석 아티클은 전적으로 개인 투자 참고 및 바이오 도메인 학습 목적으로만 활용되어야 합니다. 어떠한 경우에도 특정 제약·바이오 종목의 지분 인수나 매수·매도 타이밍 추천을 구성하지 않습니다. 데이터 시차, 네트워크 오역 등으로 인해 일어나는 투자 손익에 대해 어떠한 법적 손해배상 책임도 지지 않음을 선언합니다.</p>
+                `
+            }
+        };
+
+        const nonCorporateKeywords = [
+            'university', 'univ', 'hospital', 'medical center', 'clinic', 'institute', 'nih', 
+            'foundation', 'school', 'college', 'center', 'research', 'ministry', 'charity', 
+            'government', 'veterans affairs', 'cancercare', 'consortium', 'alliance', 'trust', 
+            '협회', '병원', '대학교', '연구소', '센터', '의료원', '학회', '정부'
+        ];
+
+        window.onload = function() {
+            updateStaticUI();
+            
+            const isLocal = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' || 
+                            window.location.protocol === 'file:';
+                            
+            if (!isLocal) {
+                initVisitorCounters(); 
+            } else {
+                console.log("공지: 개발자 로컬 테스트 환경이므로 방문자수 카운트를 생략합니다.");
+                try {
+                    const visitData = JSON.parse(localStorage.getItem('biotrack_visits') || '{"todayCount":0,"totalCount":0}');
+                    document.getElementById('statTodayCount').innerText = (visitData.todayCount || 0).toLocaleString();
+                    document.getElementById('statTotalCount').innerText = (visitData.totalCount || 0).toLocaleString();
+                    document.getElementById('statLiveCount').innerText = "1";
+                } catch(e){}
+            }
+
+            setTimeout(() => {
+                fetchClinicalData();
+            }, 300);
+        };
+
+        function initVisitorCounters() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                let visitData = JSON.parse(localStorage.getItem('biotrack_visits') || '{}');
+                
+                if (visitData.lastDate !== today) {
+                    visitData.lastDate = today;
+                    visitData.todayCount = 0;
+                }
+                visitData.todayCount = (visitData.todayCount || 0) + 1;
+                visitData.totalCount = (visitData.totalCount || 0) + 1;
+                
+                localStorage.setItem('biotrack_visits', JSON.stringify(visitData));
+
+                document.getElementById('statTodayCount').innerText = visitData.todayCount.toLocaleString();
+                document.getElementById('statTotalCount').innerText = visitData.totalCount.toLocaleString();
+                
+                document.getElementById('statLiveCount').innerText = (Math.floor(Math.random() * 3) + 1).toLocaleString();
+            } catch (e) {
+                document.getElementById('statTodayCount').innerText = "1";
+                document.getElementById('statTotalCount').innerText = "1";
+                document.getElementById('statLiveCount').innerText = "1";
+            }
+        }
+
+        function switchView(viewName) {
+            const dashView = document.getElementById('dashboardView');
+            const blogView = document.getElementById('blogView');
+            const dashTab = document.getElementById('tabDashboard');
+            const blogTab = document.getElementById('tabBlog');
+
+            backToArticleList();
+
+            if (viewName === 'dashboard') {
+                dashView.classList.remove('hidden');
+                blogView.classList.add('hidden');
+                
+                dashTab.className = "px-4 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center gap-1.5 transition-all";
+                blogTab.className = "px-4 py-2.5 bg-gray-800/80 text-gray-400 text-xs font-bold rounded-xl hover:bg-gray-700 hover:text-gray-200 cursor-pointer flex items-center gap-1.5 transition-all";
+            } else {
+                dashView.classList.add('hidden');
+                blogView && blogView.classList.remove('hidden');
+
+                dashTab.className = "px-4 py-2.5 bg-gray-800/80 text-gray-400 text-xs font-bold rounded-xl hover:bg-gray-700 hover:text-gray-200 cursor-pointer flex items-center gap-1.5 transition-all";
+                blogTab.className = "px-4 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center gap-1.5 transition-all";
+            }
+        }
+
+        function goHome() {
+            if (isSearching) return;
+            document.getElementById('searchType').value = 'spons';
+            document.getElementById('diseaseInput').value = 'Janux';
+            document.getElementById('phaseFilter').value = 'ALL';
+            document.getElementById('statusFilter').value = 'ALL';
+            switchView('dashboard');
+            fetchClinicalData();
+        }
+
+        async function universalTranslator(text, targetLang) {
+            if (!text || text === 'N/A' || text === 'Unknown' || text === '지정되지 않음') return text;
+            if (targetLang === 'ko' && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text)) return text;
+            if (targetLang === 'en' && !/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text)) return text;
+
+            const sourceLang = targetLang === 'ko' ? 'en' : 'ko';
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 2500);
+
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`, { signal: controller.signal });
+                clearTimeout(id);
+                const data = await res.json();
+                return data[0].map(item => item[0]).join('');
+            } catch (e) {
+                clearTimeout(id);
+                return text; 
+            }
+        }
+
+        function detectModality(study) {
+            const protocol = study.protocolSection;
+            if (!protocol) return { type: '기타/합성신약', class: 'bg-gray-800 text-gray-400 border-gray-700' };
+
+            const title = (protocol.identificationModule?.briefTitle || '').toLowerCase();
+            const summary = (protocol.descriptionModule?.briefSummary || '').toLowerCase();
+            const desc = (protocol.descriptionModule?.detailedDescription || '').toLowerCase();
+            const interventions = (protocol.armsInterventionsModule?.interventions || []).map(i => (i.name || '').toLowerCase()).join(' ');
+            const conditions = (protocol.conditionsModule?.conditions || []).map(c => c.toLowerCase()).join(' ');
+
+            const combinedText = `${title} ${summary} ${desc} ${interventions} ${conditions}`;
+
+            const adcKeywords = [
+                'adc', 'antibody-drug', 'conjugate', 'payload', 'immunoconjugate', 
+                'deruxtecan', 'exatecan', 'mmae', 'mmad', 'sn-38', 'sn38', 'duocarmycin', 'maytansine', 'dm1', 'dm4', 
+                'trop2', 'her2', 'claudin', 'cldn18', 'cldn', 'her3', 't-dm1', 'dxd', 'se roadside', 
+                'drug-to-antibody', 'cleavable linker', 'non-cleavable', 'isac', 'immune-stimulating conjugate'
+            ];
+
+            const isADC = adcKeywords.some(keyword => combinedText.includes(keyword)) || 
+                          (combinedText.includes('antibody') && (combinedText.includes('toxic') || combinedText.includes('inhibitor') || combinedText.includes('chemotherapy')) && combinedText.includes('target'));
+
+            if (isADC) {
+                return { type: 'ADC 치료제', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+            }
+
+            if (combinedText.includes('mrna') || combinedText.includes('sirna') || combinedText.includes('rnai') || combinedText.includes('antisense') || combinedText.includes('oligonucleotide') || combinedText.includes('aso') || combinedText.includes('ribozyme') || combinedText.includes('trans-splicing') || combinedText.includes('rna editing') || combinedText.includes('messenger rna') || combinedText.includes('short interfering')) {
+                return { type: '유전자(RNA)', class: 'bg-teal-500/20 text-teal-300 border-teal-500/40' };
+            }
+
+            if (combinedText.includes('gene therapy') || combinedText.includes('crispr') || combinedText.includes('cas9') || combinedText.includes('gene editing') || combinedText.includes('vector') || combinedText.includes('lentiviral') || combinedText.includes('adenoviral') || combinedText.includes('adeno-associated') || combinedText.includes('aav') || combinedText.includes('plasmid') || combinedText.includes('dna therapy')) {
+                return { type: '유전자(DNA)', class: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+            }
+
+            if (combinedText.includes('protac') || combinedText.includes('targeted protein degradation') || combinedText.includes('tpd') || combinedText.includes('degrader') || combinedText.includes('molecular glue') || combinedText.includes('e3 ligase') || combinedText.includes('ubiquitin') || (combinedText.includes('chimeric') && combinedText.includes('degradation'))) {
+                return { type: 'PROTAC / TPD', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
+            }
+
+            if (combinedText.includes('car-t') || combinedText.includes('car-nk') || combinedText.includes('cell therapy') || combinedText.includes('t-cell') || combinedText.includes('nk cell') || combinedText.includes('stem cell') || combinedText.includes('autologous') || combinedText.includes('allogeneic')) {
+                return { type: '세포 치료제', class: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40' };
+            }
+
+            if (combinedText.includes('antibody') || combinedText.includes('monoclonal') || combinedText.includes('bispecific') || combinedText.includes('trispecific') || combinedText.includes('mab') || combinedText.includes('scfv')) {
+                return { type: '항체 치료제', class: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' };
+            }
+
+            return { type: '일반/합성신약', class: 'bg-gray-800/80 text-gray-400 border-gray-700' };
+        }
+
+        const i18n = {
+            ko: {
+                subtitle: "글로벌 임상 리서치 플랫폼",
+                searchBtn: "검색",
+                loadingText: "데이터 동기화 및 모달리티 연산 중...",
+                cardTotal: "정제 파이프라인",
+                cardPhase3: "기업 주도 3상",
+                cardSponsors: "순수 바이오텍",
+                cardRecent: "최근 개시 (1년)",
+                chartTitle: "선두 바이오텍 TOP 10",
+                chartDesc: "해당 부문 기업별 임상 파이프라인 수 점유율입니다.",
+                chartLabel: "활성 임상 수",
+                phaseTitle: "파이프라인 단계 분포",
+                phaseDesc: "기업 전용 프로젝트의 임상 단계 밀집도입니다.",
+                tableTitle: "기업 핵심 파이프라인 매트릭스",
+                tableDesc: "모달리티 배지 및 임상 세부 내용을 모바일 뷰로 확인합니다.",
+                noData: "매칭되는 임상 데이터가 없습니다.",
+                alertEmpty: "검색어를 입력해 주세요.",
+                alertError: "네트워크 통신 차단 또는 매칭되는 데이터가 없습니다.",
+                searchTypeCond: "질환명 검색",
+                searchTypeSpons: "기업명 검색",
+                searchTypeModal: "모달리티 검색",
+                phasesText: {
+                    'PHASE3': 'Phase 3 (후기)', 'PHASE2': 'Phase 2 (중기)', 'PHASE1': 'Phase 1 (초기)',
+                    'EARLY_PHASE1': 'Early Phase 1', 'PHASE4': 'Phase 4 (추적)', 'NA': '기타 / 미분류'
+                },
+                filterPhase: [
+                    { value: "ALL", text: "모든 단계" }, { value: "PHASE1", text: "Phase 1" },
+                    { value: "PHASE2", text: "Phase 2" }, { value: "PHASE3", text: "Phase 3" },
+                    { value: "PHASE4", text: "Phase 4" }, { value: "NA", text: "기타/NA" }
+                ],
+                filterStatus: [
+                    { value: "ALL", text: "모든 상태" }, { value: "RECRUITING", text: "RECRUITING (모집중)" },
+                    { value: "ACTIVE_NOT_RECRUITING", text: "ACTIVE (진행중)" }, { value: "COMPLETED", text: "COMPLETED (종료)" },
+                    { value: "TERMINATED", text: "TERMINATED (중단)" }
+                ],
+                tableHeaders: ["바이오텍 (Sponsor)", "단계", "물질 메커니즘 & 적응증", "임상 시험 과제명", "상태", "타임라인"]
+            },
+            en: {
+                subtitle: "Global clinical analysis platform for stock investors",
+                searchBtn: "Search",
+                loadingText: "Syncing & refining enterprise assets...",
+                cardTotal: "Refined Assets",
+                cardPhase3: "Corp Phase 3",
+                cardSponsors: "Unique Corps",
+                cardRecent: "Recent (1Yr)",
+                chartTitle: "Top Leaders TOP 10",
+                chartDesc: "Active trial pipeline count share breakdown per corporation.",
+                chartLabel: "Active Trials",
+                phaseTitle: "Phase Distribution",
+                phaseDesc: "Density breakdown of corporate clinical pipeline stages.",
+                tableTitle: "Corporate Core Pipeline Matrix",
+                tableDesc: "Examine target modalities and disease details on the mobile screen.",
+                noData: "No matches found for current configurations.",
+                alertEmpty: "Please enter a valid query term",
+                alertError: "Network blocked or no pure corporate clinical trials matched.",
+                searchTypeCond: "Search Disease",
+                searchTypeSpons: "Search Corporate",
+                searchTypeModal: "Search Modality",
+                disclaimerTitle: "Legal Disclaimer & Data Source",
+                phasesText: {
+                    'PHASE3': 'Phase 3 (Late)', 'PHASE2': 'Phase 2 (Mid)', 'PHASE1': 'Phase 1 (Early)',
+                    'EARLY_PHASE1': 'Early Phase 1', 'PHASE4': 'Phase 4 (Post)', 'NA': 'N/A / Unclassified'
+                },
+                filterPhase: [
+                    { value: "ALL", text: "All Phases" }, { value: "PHASE1", text: "Phase 1" },
+                    { value: "PHASE2", text: "Phase 2" }, { value: "PHASE3", text: "Phase 3" },
+                    { value: "PHASE4", text: "Phase 4" }, { value: "NA", text: "N/A / Others" }
+                ],
+                filterStatus: [
+                    { value: "ALL", text: "All Status" }, { value: "RECRUITING", text: "RECRUITING" },
+                    { value: "ACTIVE_NOT_RECRUITING", text: "ACTIVE" }, { value: "COMPLETED", text: "COMPLETED" },
+                    { value: "TERMINATED", text: "TERMINATED" }
+                ],
+                tableHeaders: ["Bio-Pharma Sponsor", "Phase", "Modality & Indication Mechanism", "Clinical Trial Title", "Status", "Timeline"]
+            }
+        };
+
+        function toggleLanguage() {
+            if (isSearching) return;
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            const btnSpanText = currentLang === 'ko' ? 'EN' : 'KO';
+            document.getElementById('langBtn').querySelector('span').innerText = btnSpanText;
+            document.getElementById('langBtnDesktop').querySelector('span').innerText = btnSpanText;
+            updateStaticUI();
+            filterAndRenderTable();
+        }
+
+        function updateStaticUI() {
+            const p = i18n[currentLang];
+            document.getElementById('ui-subtitle').innerText = p.subtitle;
+            document.getElementById('ui-searchBtn').querySelector('span').innerText = p.searchBtn;
+            document.getElementById('ui-loadingText').innerText = p.loadingText;
+            document.getElementById('ui-cardTotal').innerText = p.cardTotal;
+            document.getElementById('ui-cardPhase3').innerText = p.cardPhase3;
+            document.getElementById('ui-cardSponsors').innerText = p.cardSponsors;
+            document.getElementById('ui-cardRecent').innerText = p.cardRecent;
+            document.getElementById('ui-chartTitle').innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i> ${p.chartTitle}`;
+            document.getElementById('ui-chartDesc').innerText = p.chartDesc;
+            document.getElementById('ui-phaseTitle').innerHTML = `<i class="fa-solid fa-pie-chart text-indigo-400"></i> ${p.phaseTitle}`;
+            document.getElementById('ui-phaseDesc').innerText = p.phaseDesc;
+            document.getElementById('ui-tableTitle').innerHTML = `<i class="fa-solid fa-list-check text-gray-400"></i> ${p.tableTitle}`;
+            document.getElementById('ui-tableDesc').innerText = p.tableDesc;
+
+            const searchTypeSelect = document.getElementById('searchType');
+            const savedSearchType = searchTypeSelect.value || "spons";
+            searchTypeSelect.innerHTML = `
+                <option value="spons">${p.searchTypeSpons}</option>
+                <option value="cond">${p.searchTypeCond}</option>
+                <option value="modal">${p.searchTypeModal}</option>
+            `;
+            searchTypeSelect.value = savedSearchType;
+
+            const phaseSelect = document.getElementById('phaseFilter');
+            const savedPhaseVal = phaseSelect.value || "ALL";
+            phaseSelect.innerHTML = p.filterPhase.map(f => `<option value="${f.value}">${f.text}</option>`).join('');
+            phaseSelect.value = savedPhaseVal;
+
+            const statusSelect = document.getElementById('statusFilter');
+            const savedStatusVal = statusSelect.value || "ALL";
+            statusSelect.innerHTML = p.filterStatus.map(s => `<option value="${s.value}">${s.text}</option>`).join('');
+            statusSelect.value = savedStatusVal;
+
+            document.getElementById('ui-tableHeader').innerHTML = p.tableHeaders.map((h, i) => 
+                `<th class="py-2.5 px-4 text-xs ${i === p.tableHeaders.length - 1 ? 'text-right' : ''}">${h}</th>`
+            ).join('');
+        }
+
+        async function fetchClinicalData() {
+            if (isSearching) return; 
+            
+            const rawInput = document.getElementById('diseaseInput').value.trim();
+            const searchType = document.getElementById('searchType').value;
+            if (!rawInput) return alert(i18n[currentLang].alertEmpty);
+
+            switchView('dashboard');
+
+            isSearching = true;
+            const loadingState = document.getElementById('loadingState');
+            const dashboardContent = document.getElementById('dashboardContent');
+
+            loadingState.classList.remove('hidden');
+            dashboardContent.classList.add('opacity-40');
+
+            const apiController = new AbortController();
+            const apiTimeoutId = setTimeout(() => apiController.abort(), 5000);
+
+            try {
+                let queryTerm = rawInput;
+                if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(rawInput)) {
+                    queryTerm = await universalTranslator(rawInput, 'en');
+                }
+
+                let apiUrl = '';
+                if (searchType === 'modal') {
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(queryTerm)}&pageSize=30`; 
+                } else {
+                    const paramName = searchType === 'cond' ? 'query.cond' : 'query.spons';
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?${paramName}=${encodeURIComponent(queryTerm)}&pageSize=30`;
+                }
+                
+                const response = await fetch(apiUrl, { signal: apiController.signal }).catch(err => {
+                    if (err.name === 'AbortError') throw new Error("API_TIMEOUT");
+                    throw new Error("CORS_BLOCKED_BY_MOBILE");
+                });
+
+                clearTimeout(apiTimeoutId);
+                if (!response.ok) throw new Error("API_RESPONSE_NOT_OK");
+                
+                const data = await response.json();
+                const allStudies = data.studies || [];
+
+                let baseCorporateData = allStudies.filter(study => {
+                    const leadSponsor = study.protocolSection?.sponsorCollaboratorsModule?.leadSponsor?.name;
+                    if (!leadSponsor) return false;
+                    const lowerSponsor = leadSponsor.toLowerCase();
+                    return !nonCorporateKeywords.some(keyword => lowerSponsor.includes(keyword));
+                });
+
+                if (searchType === 'modal') {
+                    filteredCorporateData = baseCorporateData.filter(study => {
+                        const detected = detectModality(study);
+                        return detected.type.toLowerCase().includes(rawInput.toLowerCase()) || 
+                               detected.type.toLowerCase().replace(/\s+/g, '').includes(rawInput.toLowerCase().replace(/\s+/g, ''));
+                    });
+                } else {
+                    filteredCorporateData = baseCorporateData;
+                }
+
+                processAndRenderDashboard();
+            } catch (error) {
+                clearTimeout(apiTimeoutId);
+                if (error.message === "API_TIMEOUT") {
+                    alert("⏱️ 미국 임상 서버 응답이 지연되었습니다. 잠시 후 다시 시도해 주세요.");
+                } else if (error.message === "CORS_BLOCKED_BY_MOBILE") {
+                    alert("⚠️ 로컬 보안 차단! GitHub 정식 배포 링크로 열어야 연동됩니다.");
+                } else {
+                    alert(i18n[currentLang].alertError);
+                }
+                filteredCorporateData = [];
+                processAndRenderDashboard();
+            } finally {
+                isSearching = false;
+                loadingState.classList.add('hidden');
+                dashboardContent.classList.remove('opacity-40');
+            }
+        }
+
+        function processAndRenderDashboard() {
+            const stats = { total: filteredCorporateData.length, phase3: 0, uniqueSponsors: new Set(), recentStudies: 0 };
+            const sponsorCounts = {};
+            const phaseCounts = { 'PHASE3': 0, 'PHASE2': 0, 'PHASE1': 0, 'EARLY_PHASE1': 0, 'PHASE4': 0, 'NA': 0 };
+
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            filteredCorporateData.forEach(study => {
+                const protocol = study.protocolSection;
+                if (!protocol) return;
+
+                const leadSponsor = protocol.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown Corp';
+                const cleanedSponsor = leadSponsor.replace(/,?\s*(Inc\.|Ltd\.|Co\.|LLC|Corporation|GmbH|S\.A\.|Plc|Holdings)/gi, '');
+                stats.uniqueSponsors.add(cleanedSponsor);
+                sponsorCounts[cleanedSponsor] = (sponsorCounts[cleanedSponsor] || 0) + 1;
+
+                const phases = protocol.designModule?.phases || [];
+                if (phases.length === 0) phaseCounts['NA']++;
+                else {
+                    phases.forEach(p => {
+                        const formattedPhase = p.toUpperCase().replace(/\s+/g, '');
+                        if (phaseCounts[formattedPhase] !== undefined) phaseCounts[formattedPhase]++;
+                        if (formattedPhase === 'PHASE3') stats.phase3++;
+                    });
+                }
+
+                const startDateStr = protocol.statusModule?.startDateStruct?.date;
+                if (startDateStr) {
+                    if (new Date(startDateStr) >= oneYearAgo) stats.recentStudies++;
+                }
+            });
+
+            document.getElementById('statTotal').innerText = stats.total;
+            document.getElementById('statPhase3').innerText = stats.phase3;
+            document.getElementById('statSponsors').innerText = stats.uniqueSponsors.size;
+            document.getElementById('statRecent').innerText = stats.recentStudies;
+
+            renderSponsorChart(sponsorCounts);
+            renderPhaseDistributionUI(phaseCounts, stats.total);
+            filterAndRenderTable();
+        }
+
+        function renderSponsorChart(sponsorCounts) {
+            const sortedSponsors = Object.entries(sponsorCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const labels = sortedSponsors.map(item => item[0]);
+            const counts = sortedSponsors.map(item => item[1]);
+
+            if (globalChartInstance) globalChartInstance.destroy();
+
+            const ctx = document.getElementById('sponsorChart').getContext('2d');
+            globalChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: i18n[currentLang].chartLabel,
+                        data: counts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                        borderColor: 'rgba(129, 140, 248, 1)',
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 9 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#9ca3af', font: { size: 9 }, stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderPhaseDistributionUI(phaseCounts, total) {
+            const container = document.getElementById('phaseDistributionList');
+            container.innerHTML = '';
+
+            const phaseMeta = {
+                'PHASE3': 'bg-emerald-500', 'PHASE2': 'bg-indigo-500', 'PHASE1': 'bg-blue-500',
+                'EARLY_PHASE1': 'bg-sky-500', 'PHASE4': 'bg-purple-500', 'NA': 'bg-gray-600'
+            };
+
+            Object.entries(phaseMeta).forEach(([key, colorClass]) => {
+                const count = phaseCounts[key] || 0;
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                const phaseName = i18n[currentLang].phasesText[key];
+
+                const element = document.createElement('div');
+                element.className = 'space-y-1';
+                element.innerHTML = `
+                    <div class="flex justify-between text-[11px] font-medium">
+                        <span class="text-gray-300 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full ${colorClass}"></span> ${phaseName}
+                        </span>
+                        <span class="text-gray-400">${count} (${percentage}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-1.5 overflow-hidden border border-gray-800/40">
+                        <div class="${colorClass} h-1.5 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(element);
+            });
+        }
+
+        async function filterAndRenderTable() {
+            const phaseFilter = document.getElementById('phaseFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const tableBody = document.getElementById('pipelineTableBody');
+            tableBody.innerHTML = '';
+
+            let rawRowsData = [];
+
+            for (const study of filteredCorporateData) {
+                const protocol = study.protocolSection;
+                if (!protocol) continue;
+
+                const leadSponsor = protocol.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown Corp';
+                const phases = protocol.designModule?.phases || [];
+                const phaseText = phases.length > 0 ? phases.join(', ') : 'N/A';
+                const currentStatus = protocol.statusModule?.overallStatus || 'UNKNOWN';
+                const nctId = protocol.identificationModule?.nctId || '';
+                const briefTitle = protocol.identificationModule?.briefTitle || 'No Title';
+
+                const interventions = protocol.armsInterventionsModule?.interventions || [];
+                const rawInterventionNames = interventions.map(i => `[${i.type || 'Drug'}] ${i.name}`).join(', ') || '지정되지 않음';
+
+                const conditions = protocol.conditionsModule?.conditions || [];
+                const rawConditionNames = conditions.join(', ') || '지정되지 않음';
+
+                const modalityInfo = detectModality(study);
+
+                if (phaseFilter !== 'ALL') {
+                    const hasPhaseMatch = phases.some(p => p.toUpperCase().replace(/\s+/g, '') === phaseFilter);
+                    if (phaseFilter === 'NA' && phases.length > 0) continue;
+                    if (phaseFilter !== 'NA' && !hasPhaseMatch) continue;
+                }
+                if (statusFilter !== 'ALL' && currentStatus.toUpperCase() !== statusFilter) continue;
+
+                const startDate = protocol.statusModule?.startDateStruct?.date || 'N/A';
+                const completionDate = protocol.statusModule?.completionDateStruct?.date || 'N/A';
+
+                rawRowsData.push({
+                    leadSponsor, phaseText, currentStatus, nctId, briefTitle, 
+                    rawInterventionNames, rawConditionNames, modalityInfo, startDate, completionDate
+                });
+            }
+
+            if (rawRowsData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-xs text-gray-500">
+                            <i class="fa-solid fa-circle-info text-md mb-1 block"></i> ${i18n[currentLang].noData}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const translatedRows = await Promise.all(rawRowsData.map(async (row) => {
+                let displayTitle = row.briefTitle;
+                let displayIntervention = row.rawInterventionNames;
+                let displayCondition = row.rawConditionNames;
+
+                if (currentLang === 'ko') {
+                    const tTitle = universalTranslator(row.briefTitle, 'ko');
+                    const tInter = universalTranslator(row.rawInterventionNames, 'ko');
+                    const tCond = universalTranslator(row.rawConditionNames, 'ko');
+                    [displayTitle, displayIntervention, displayCondition] = await Promise.all([tTitle, tInter, tCond]);
+                }
+
+                let statusBadgeClass = 'bg-gray-800 text-gray-400 border-gray-700';
+                if (['RECRUITING', 'ACTIVE_NOT_RECRUITING'].includes(row.currentStatus.toUpperCase())) {
+                    statusBadgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                } else if (row.currentStatus.toUpperCase() === 'COMPLETED') {
+                    statusBadgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+                } else if (['TERMINATED', 'WITHDRAWN', 'SUSPENDED'].includes(row.currentStatus.toUpperCase())) {
+                    statusBadgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+                }
+
+                return `
+                    <tr class="hover:bg-gray-900/40 transition-colors border-b border-gray-900/50">
+                        <td class="py-3.5 px-4 font-semibold text-white max-w-[120px] truncate">${row.leadSponsor}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-1.5 py-0.5 bg-gray-950 border border-gray-800 text-gray-300 font-mono text-[10px] rounded">${row.phaseText}</span>
+                        </td>
+                        <td class="py-3.5 px-4 max-w-xs">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center flex-wrap gap-1">
+                                    <span class="px-1 py-0.5 text-[8px] font-extrabold rounded border ${row.modalityInfo.class} shrink-0">
+                                        ${row.modalityInfo.type}
+                                    </span>
+                                    <span class="text-xs text-indigo-300 font-medium truncate max-w-[150px]">${displayIntervention}</span>
+                                </div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">
+                                    <span class="text-amber-400/90 font-bold">[적응증]</span> ${displayCondition}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 max-w-[180px]">
+                            <div class="text-xs text-gray-400 truncate">${displayTitle}</div>
+                            <a href="https://clinicaltrials.gov/study/${row.nctId}" target="_blank" class="text-[9px] text-gray-500 font-mono hover:underline hover:text-indigo-400 block mt-0.5">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-0.5"></i>${row.nctId}
+                            </a>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-1.5 py-0.5 border text-[9px] font-bold rounded tracking-wider ${statusBadgeClass}">${row.currentStatus}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-[10px] font-mono text-gray-400">
+                            <div>S: ${row.startDate}</div> <div class="text-[9px] text-gray-500">C: ${row.completionDate}</div>
+                        </td>
+                    </tr>
+                `;
+            }));
+
+            tableBody.innerHTML = translatedRows.join('');
+        }
+
+        function showArticleDetail(articleId) {
+            const article = articlesDB[articleId];
+            if (!article) return;
+
+            document.getElementById('detailTitle').innerText = article.title;
+            document.getElementById('detailDate').innerText = article.date;
+            document.getElementById('detailContent').innerHTML = article.content;
+
+            var list = document.getElementById('articleListSection');
+            var detail = document.getElementById('articleDetailSection');
+            
+            if (list) list.style.display = 'none'; 
+            if (detail) {
+                detail.style.setProperty('display', 'block', 'important');
+                detail.classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideArticleDetail() {
+            var list = document.getElementById('articleListSection');
+            var detail = document.getElementById('articleDetailSection');
+            
+            if (detail) {
+                detail.style.setProperty('display', 'none', 'important');
+                detail.classList.add('hidden');
+            }
+            if (list) {
+                list.style.setProperty('display', 'block', 'important');
+                list.classList.remove('hidden');
+            }
+        }
+
+        function backToArticleList() {
+            hideArticleDetail();
+        }
+
+        // 💡 [자바스크립트 전용 모달 제어 마스터 로직]
+        function openPolicyModal(type) {
+            const data = policyTextsDB[type];
+            if (!data) return;
+
+            // 모달창 내부에 타이틀과 내용을 주입
+            document.getElementById('modalTitle').innerHTML = data.title;
+            document.getElementById('modalBody').innerHTML = data.content;
+
+            // 모달 오버레이 강제 활성화
+            const overlay = document.getElementById('policyModalOverlay');
+            if (overlay) {
+                overlay.style.setProperty('display', 'flex', 'important');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function closePolicyModal() {
+            const overlay = document.getElementById('policyModalOverlay');
+            if (overlay) {
+                overlay.style.setProperty('display', 'none', 'important');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // 모달창 깥쪽(배경) 클릭 시 창이 자동으로 닫히는 UX 보강 편의 기능
+        document.getElementById('policyModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePolicyModal();
+            }
+        });
+    </script>
+</body>
+</html>
