@@ -532,3 +532,449 @@
                 searchTypeSpons: "Search Corporate",
                 searchTypeModal: "Search Modality",
                 disclaimerTitle: "Legal Disclaimer & Data Source",
+                phasesText: {
+                    'PHASE3': 'Phase 3 (Late)', 'PHASE2': 'Phase 2 (Mid)', 'PHASE1': 'Phase 1 (Early)',
+                    'EARLY_PHASE1': 'Early Phase 1', 'PHASE4': 'Phase 4 (Post)', 'NA': 'N/A / Unclassified'
+                },
+                filterPhase: [
+                    { value: "ALL", text: "All Phases" }, { value: "PHASE1", text: "Phase 1" },
+                    { value: "PHASE2", text: "Phase 2" }, { value: "PHASE3", text: "Phase 3" },
+                    { value: "PHASE4", text: "Phase 4" }, { value: "NA", text: "N/A / Others" }
+                ],
+                filterStatus: [
+                    { value: "ALL", text: "All Status" }, { value: "RECRUITING", text: "RECRUITING" },
+                    { value: "ACTIVE_NOT_RECRUITING", text: "ACTIVE" }, { value: "COMPLETED", text: "COMPLETED" },
+                    { value: "TERMINATED", text: "TERMINATED" }
+                ],
+                tableHeaders: ["Bio-Pharma Sponsor", "Phase", "Modality & Indication Mechanism", "Clinical Trial Title", "Status", "Timeline"]
+            }
+        };
+
+        function toggleLanguage() {
+            if (isSearching) return;
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            const btnSpanText = currentLang === 'ko' ? 'EN' : 'KO';
+            document.getElementById('langBtn').querySelector('span').innerText = btnSpanText;
+            document.getElementById('langBtnDesktop').querySelector('span').innerText = btnSpanText;
+            updateStaticUI();
+            filterAndRenderTable();
+        }
+
+        function updateStaticUI() {
+            const p = i18n[currentLang];
+            document.getElementById('ui-subtitle').innerText = p.subtitle;
+            document.getElementById('ui-searchBtn').querySelector('span').innerText = p.searchBtn;
+            document.getElementById('ui-loadingText').innerText = p.loadingText;
+            document.getElementById('ui-cardTotal').innerText = p.cardTotal;
+            document.getElementById('ui-cardPhase3').innerText = p.cardPhase3;
+            document.getElementById('ui-cardSponsors').innerText = p.cardSponsors;
+            document.getElementById('ui-cardRecent').innerText = p.cardRecent;
+            document.getElementById('ui-chartTitle').innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i> ${p.chartTitle}`;
+            document.getElementById('ui-chartDesc').innerText = p.chartDesc;
+            document.getElementById('ui-phaseTitle').innerHTML = `<i class="fa-solid fa-pie-chart text-indigo-400"></i> ${p.phaseTitle}`;
+            document.getElementById('ui-phaseDesc').innerText = p.phaseDesc;
+            document.getElementById('ui-tableTitle').innerHTML = `<i class="fa-solid fa-list-check text-gray-400"></i> ${p.tableTitle}`;
+            document.getElementById('ui-tableDesc').innerText = p.tableDesc;
+
+            const searchTypeSelect = document.getElementById('searchType');
+            const savedSearchType = searchTypeSelect.value || "spons";
+            searchTypeSelect.innerHTML = `
+                <option value="spons">${p.searchTypeSpons}</option>
+                <option value="cond">${p.searchTypeCond}</option>
+                <option value="modal">${p.searchTypeModal}</option>
+            `;
+            searchTypeSelect.value = savedSearchType;
+
+            const phaseSelect = document.getElementById('phaseFilter');
+            const savedPhaseVal = phaseSelect.value || "ALL";
+            phaseSelect.innerHTML = p.filterPhase.map(f => `<option value="${f.value}">${f.text}</option>`).join('');
+            phaseSelect.value = savedPhaseVal;
+
+            const statusSelect = document.getElementById('statusFilter');
+            const savedStatusVal = statusSelect.value || "ALL";
+            statusSelect.innerHTML = p.filterStatus.map(s => `<option value="${s.value}">${s.text}</option>`).join('');
+            statusSelect.value = savedStatusVal;
+
+            document.getElementById('ui-tableHeader').innerHTML = p.tableHeaders.map((h, i) => 
+                `<th class="py-2.5 px-4 text-xs ${i === p.tableHeaders.length - 1 ? 'text-right' : ''}">${h}</th>`
+            ).join('');
+        }
+
+        async function fetchClinicalData() {
+            if (isSearching) return; 
+            
+            let rawInput = document.getElementById('diseaseInput').value.trim();
+            const searchType = document.getElementById('searchType').value;
+            if (!rawInput) return alert(i18n[currentLang].alertEmpty);
+
+            switchView('dashboard');
+
+            isSearching = true;
+            const loadingState = document.getElementById('loadingState');
+            const dashboardContent = document.getElementById('dashboardContent');
+
+            loadingState.classList.remove('hidden');
+            dashboardContent.classList.add('opacity-40');
+
+            const apiController = new AbortController();
+            const apiTimeoutId = setTimeout(() => apiController.abort(), 6000); 
+
+            try {
+                let queryTerm = rawInput;
+                if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(rawInput)) {
+                    if (rawInput.includes('췌장암')) {
+                        queryTerm = 'Pancreatic Cancer';
+                    } else if (rawInput.includes('위암')) {
+                        queryTerm = 'Gastric Cancer';
+                    } else if (rawInput.includes('유방암')) {
+                        queryTerm = 'Breast Cancer';
+                    } else if (rawInput.includes('고형암')) {
+                        queryTerm = 'Solid Tumor';
+                    } else {
+                        queryTerm = await universalTranslator(rawInput, 'en');
+                    }
+                }
+
+                let apiUrl = '';
+                if (searchType === 'cond') {
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(queryTerm)}&pageSize=100`;
+                } else if (searchType === 'spons') {
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.spons=${encodeURIComponent(queryTerm)}&pageSize=100`;
+                } else if (searchType === 'modal') {
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(queryTerm)}&pageSize=100`; 
+                }
+                
+                const response = await fetch(apiUrl, { signal: apiController.signal }).catch(err => {
+                    if (err.name === 'AbortError') throw new Error("API_TIMEOUT");
+                    throw new Error("CORS_BLOCKED_BY_MOBILE");
+                });
+
+                clearTimeout(apiTimeoutId);
+                if (!response.ok) throw new Error("API_RESPONSE_NOT_OK");
+                
+                const data = await response.json();
+                const allStudies = data.studies || [];
+
+                let baseCorporateData = allStudies.filter(study => {
+                    const leadSponsor = study.protocolSection?.sponsorCollaboratorsModule?.leadSponsor?.name;
+                    if (!leadSponsor) return false;
+                    const lowerSponsor = leadSponsor.toLowerCase();
+                    return !nonCorporateKeywords.some(keyword => lowerSponsor.includes(keyword));
+                });
+
+                if (searchType === 'modal') {
+                    filteredCorporateData = baseCorporateData.filter(study => {
+                        const detected = detectModality(study);
+                        return detected.type.toLowerCase().includes(rawInput.toLowerCase()) || 
+                               detected.type.toLowerCase().replace(/\s+/g, '').includes(rawInput.toLowerCase().replace(/\s+/g, ''));
+                    });
+                } else {
+                    filteredCorporateData = baseCorporateData;
+                }
+
+                processAndRenderDashboard();
+            } catch (error) {
+                clearTimeout(apiTimeoutId);
+                if (error.message === "API_TIMEOUT") {
+                    alert("⏱️ 미국 임상 서버 응답이 지연되었습니다. 잠시 후 다시 시도해 주세요.");
+                } else if (error.message === "CORS_BLOCKED_BY_MOBILE") {
+                    alert("⚠️ 로컬 보안 차단! GitHub 정식 배포 링크로 열어야 연동됩니다.");
+                } else {
+                    alert(i18n[currentLang].alertError);
+                }
+                filteredCorporateData = [];
+                processAndRenderDashboard();
+            } finally {
+                isSearching = false;
+                loadingState.classList.add('hidden');
+                dashboardContent.classList.remove('opacity-40');
+            }
+        }
+
+        function processAndRenderDashboard() {
+            const stats = { total: filteredCorporateData.length, phase3: 0, uniqueSponsors: new Set(), recentStudies: 0 };
+            const sponsorCounts = {};
+            const phaseCounts = { 'PHASE3': 0, 'PHASE2': 0, 'PHASE1': 0, 'EARLY_PHASE1': 0, 'PHASE4': 0, 'NA': 0 };
+
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            filteredCorporateData.forEach(study => {
+                const protocol = study.protocolSection;
+                if (!protocol) return;
+
+                const leadSponsor = protocol.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown Corp';
+                const cleanedSponsor = leadSponsor.replace(/,?\s*(Inc\.|Ltd\.|Co\.|LLC|Corporation|GmbH|S\.A\.|Plc|Holdings)/gi, '');
+                stats.uniqueSponsors.add(cleanedSponsor);
+                sponsorCounts[cleanedSponsor] = (sponsorCounts[cleanedSponsor] || 0) + 1;
+
+                const phases = protocol.designModule?.phases || [];
+                if (phases.length === 0) phaseCounts['NA']++;
+                else {
+                    phases.forEach(p => {
+                        const formattedPhase = p.toUpperCase().replace(/\s+/g, '');
+                        if (phaseCounts[formattedPhase] !== undefined) phaseCounts[formattedPhase]++;
+                        if (formattedPhase === 'PHASE3') stats.phase3++;
+                    });
+                }
+
+                const startDateStr = protocol.statusModule?.startDateStruct?.date;
+                if (startDateStr) {
+                    if (new Date(startDateStr) >= oneYearAgo) stats.recentStudies++;
+                }
+            });
+
+            document.getElementById('statTotal').innerText = stats.total;
+            document.getElementById('statPhase3').innerText = stats.phase3;
+            document.getElementById('statSponsors').innerText = stats.uniqueSponsors.size;
+            document.getElementById('statRecent').innerText = stats.recentStudies;
+
+            renderSponsorChart(sponsorCounts);
+            renderPhaseDistributionUI(phaseCounts, stats.total);
+            filterAndRenderTable();
+        }
+
+        function renderSponsorChart(sponsorCounts) {
+            const sortedSponsors = Object.entries(sponsorCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const labels = sortedSponsors.map(item => item[0]);
+            const counts = sortedSponsors.map(item => item[1]);
+
+            if (globalChartInstance) globalChartInstance.destroy();
+
+            const ctx = document.getElementById('sponsorChart').getContext('2d');
+            globalChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: i18n[currentLang].chartLabel,
+                        data: counts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                        borderColor: 'rgba(129, 140, 248, 1)',
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 9 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#9ca3af', font: { size: 9 }, stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderPhaseDistributionUI(phaseCounts, total) {
+            const container = document.getElementById('phaseDistributionList');
+            container.innerHTML = '';
+
+            const phaseMeta = {
+                'PHASE3': 'bg-emerald-500', 'PHASE2': 'bg-indigo-500', 'PHASE1': 'bg-blue-500',
+                'EARLY_PHASE1': 'bg-sky-500', 'PHASE4': 'bg-purple-500', 'NA': 'bg-gray-600'
+            };
+
+            Object.entries(phaseMeta).forEach(([key, colorClass]) => {
+                const count = phaseCounts[key] || 0;
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                const phaseName = i18n[currentLang].phasesText[key];
+
+                const element = document.createElement('div');
+                element.className = 'space-y-1';
+                element.innerHTML = `
+                    <div class="flex justify-between text-[11px] font-medium">
+                        <span class="text-gray-300 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full ${colorClass}"></span> ${phaseName}
+                        </span>
+                        <span class="text-gray-400">${count} (${percentage}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-1.5 overflow-hidden border border-gray-800/40">
+                        <div class="${colorClass} h-1.5 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(element);
+            });
+        }
+
+        async function filterAndRenderTable() {
+            const phaseFilter = document.getElementById('phaseFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const tableBody = document.getElementById('pipelineTableBody');
+            tableBody.innerHTML = '';
+
+            let rawRowsData = [];
+
+            for (const study of filteredCorporateData) {
+                const protocol = study.protocolSection;
+                if (!protocol) continue;
+
+                const leadSponsor = protocol.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown Corp';
+                const phases = protocol.designModule?.phases || [];
+                const phaseText = phases.length > 0 ? phases.join(', ') : 'N/A';
+                const currentStatus = protocol.statusModule?.overallStatus || 'UNKNOWN';
+                const nctId = protocol.identificationModule?.nctId || '';
+                const briefTitle = protocol.identificationModule?.briefTitle || 'No Title';
+
+                const interventions = protocol.armsInterventionsModule?.interventions || [];
+                const rawInterventionNames = interventions.map(i => `[${i.type || 'Drug'}] ${i.name}`).join(', ') || '지정되지 않음';
+
+                const conditions = protocol.conditionsModule?.conditions || [];
+                const rawConditionNames = conditions.join(', ') || '지정되지 않음';
+
+                const modalityInfo = detectModality(study);
+
+                if (phaseFilter !== 'ALL') {
+                    const hasPhaseMatch = phases.some(p => p.toUpperCase().replace(/\s+/g, '') === phaseFilter);
+                    if (phaseFilter === 'NA' && phases.length > 0) continue;
+                    if (phaseFilter !== 'NA' && !hasPhaseMatch) continue;
+                }
+                if (statusFilter !== 'ALL' && currentStatus.toUpperCase() !== statusFilter) continue;
+
+                const startDate = protocol.statusModule?.startDateStruct?.date || 'N/A';
+                const completionDate = protocol.statusModule?.completionDateStruct?.date || 'N/A';
+
+                rawRowsData.push({
+                    leadSponsor, phaseText, currentStatus, nctId, briefTitle, 
+                    rawInterventionNames, rawConditionNames, modalityInfo, startDate, completionDate
+                });
+            }
+
+            if (rawRowsData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-xs text-gray-500">
+                            <i class="fa-solid fa-circle-info text-md mb-1 block"></i> ${i18n[currentLang].noData}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const translatedRows = await Promise.all(rawRowsData.map(async (row) => {
+                let displayTitle = row.briefTitle;
+                let displayIntervention = row.rawInterventionNames;
+                let displayCondition = row.rawConditionNames;
+
+                if (currentLang === 'ko') {
+                    const tTitle = universalTranslator(row.briefTitle, 'ko');
+                    const tInter = universalTranslator(row.rawInterventionNames, 'ko');
+                    const tCond = universalTranslator(row.rawConditionNames, 'ko');
+                    [displayTitle, displayIntervention, displayCondition] = await Promise.all([tTitle, tInter, tCond]);
+                }
+
+                let statusBadgeClass = 'bg-gray-800 text-gray-400 border-gray-700';
+                if (['RECRUITING', 'ACTIVE_NOT_RECRUITING'].includes(row.currentStatus.toUpperCase())) {
+                    statusBadgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                } else if (row.currentStatus.toUpperCase() === 'COMPLETED') {
+                    statusBadgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+                } else if (['TERMINATED', 'WITHDRAWN', 'SUSPENDED'].includes(row.currentStatus.toUpperCase())) {
+                    statusBadgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+                }
+
+                return `
+                    <tr class="hover:bg-gray-900/40 transition-colors border-b border-gray-900/50">
+                        <td class="py-3.5 px-4 font-semibold text-white max-w-[120px] truncate">${row.leadSponsor}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-1.5 py-0.5 bg-gray-950 border border-gray-800 text-gray-300 font-mono text-[10px] rounded">${row.phaseText}</span>
+                        </td>
+                        <td class="py-3.5 px-4 max-w-xs">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center flex-wrap gap-1">
+                                    <span class="px-1 py-0.5 text-[8px] font-extrabold rounded border ${row.modalityInfo.class} shrink-0">
+                                        ${row.modalityInfo.type}
+                                    </span>
+                                    <span class="text-xs text-indigo-300 font-medium truncate max-w-[150px]">${displayIntervention}</span>
+                                </div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">
+                                    <span class="text-amber-400/90 font-bold">[적응증]</span> ${displayCondition}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 max-w-[180px]">
+                            <div class="text-xs text-gray-400 truncate">${displayTitle}</div>
+                            <a href="https://clinicaltrials.gov/study/${row.nctId}" target="_blank" class="text-[9px] text-gray-500 font-mono hover:underline hover:text-indigo-400 block mt-0.5">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-0.5"></i>${row.nctId}
+                            </a>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-1.5 py-0.5 border text-[9px] font-bold rounded tracking-wider ${statusBadgeClass}">${row.currentStatus}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-[10px] font-mono text-gray-400">
+                            <div>S: ${row.startDate}</div> <div class="text-[9px] text-gray-500">C: ${row.completionDate}</div>
+                        </td>
+                    </tr>
+                `;
+            }));
+
+            tableBody.innerHTML = translatedRows.join('');
+        }
+
+        function showArticleDetail(articleId) {
+            const article = articlesDB[articleId];
+            if (!article) return;
+
+            document.getElementById('detailTitle').innerText = article.title;
+            document.getElementById('detailDate').innerText = article.date;
+            document.getElementById('detailContent').innerHTML = article.content;
+
+            var list = document.getElementById('articleListSection');
+            var detail = document.getElementById('articleDetailSection');
+            
+            if (list) list.style.display = 'none'; 
+            if (detail) {
+                detail.style.setProperty('display', 'block', 'important');
+                detail.classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideArticleDetail() {
+            var list = document.getElementById('articleListSection');
+            var detail = document.getElementById('articleDetailSection');
+            
+            if (detail) {
+                detail.style.setProperty('display', 'none', 'important');
+                detail.classList.add('hidden');
+            }
+            if (list) {
+                list.style.setProperty('display', 'block', 'important');
+                list.classList.remove('hidden');
+            }
+        }
+
+        function backToArticleList() {
+            hideArticleDetail();
+        }
+
+        function openPolicyModal(type) {
+            const data = policyTextsDB[type];
+            if (!data) return;
+
+            document.getElementById('modalTitle').innerHTML = data.title;
+            document.getElementById('modalBody').innerHTML = data.content;
+
+            const overlay = document.getElementById('policyModalOverlay');
+            if (overlay) {
+                overlay.style.setProperty('display', 'flex', 'important');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function closePolicyModal() {
+            const overlay = document.getElementById('policyModalOverlay');
+            if (overlay) {
+                overlay.style.setProperty('display', 'none', 'important');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('policyModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePolicyModal();
+            }
+        });
+    </script>
+</body>
+</html>
