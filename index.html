@@ -667,13 +667,14 @@
             ).join('');
         }
 
-        async function fetchClinicalData() {
+      async function fetchClinicalData() {
             if (isSearching) return; 
             
             const rawInput = document.getElementById('diseaseInput').value.trim();
             const searchType = document.getElementById('searchType').value;
             if (!rawInput) return alert(i18n[currentLang].alertEmpty);
 
+            // [핵심] 검색을 시작하면 무조건 대시보드 탭으로 화면을 전환합니다.
             switchView('dashboard');
 
             isSearching = true;
@@ -693,11 +694,15 @@
                 }
 
                 let apiUrl = '';
-                if (searchType === 'modal') {
+                if (searchType === 'cond') {
+                    // 질환명 검색 시 query.cond 대신 query.term을 활용하여 
+                    // 요약본이나 상세 설명에 췌장암(Pancreatic Cancer)이 들어간 레볼루션 메디신 등의 임상까지 포괄 수집합니다.
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(queryTerm)}&pageSize=30`;
+                } else if (searchType === 'spons') {
+                    // 기업명 검색은 기존처럼 스폰서 전용 파라미터를 유지하여 정확도를 높입니다.
+                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.spons=${encodeURIComponent(queryTerm)}&pageSize=30`;
+                } else if (searchType === 'modal') {
                     apiUrl = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(queryTerm)}&pageSize=30`; 
-                } else {
-                    const paramName = searchType === 'cond' ? 'query.cond' : 'query.spons';
-                    apiUrl = `https://clinicaltrials.gov/api/v2/studies?${paramName}=${encodeURIComponent(queryTerm)}&pageSize=30`;
                 }
                 
                 const response = await fetch(apiUrl, { signal: apiController.signal }).catch(err => {
