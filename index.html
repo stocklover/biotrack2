@@ -233,33 +233,47 @@
 
     <main id="blogView" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 hidden">
         
-        <div id="articleListSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6">
-            <h2 class="text-lg sm:text-xl font-bold text-white border-b border-gray-800 pb-4 flex items-center gap-2.5">
-                <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
-            </h2>
-            
-            <article class="p-5 bg-gray-950/50 rounded-xl border border-gray-800/60 space-y-3.5">
-                <h3 class="font-bold text-indigo-300 text-base sm:text-lg leading-snug hover:underline cursor-pointer" onclick="viewArticleDetail(1)">차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석</h3>
-                <p class="text-[11px] text-gray-400">등록일자: 2026-06-13</p>
-                <p class="text-sm text-gray-300 leading-relaxed line-clamp-3">
-                    기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 전 세계 빅파마 및 바이오텍 파이프라인 전반에서 뚜렷하게 관찰되고 있습니다. 링커 기술의 안정성에 따라 약물 전달력(DAR, Drug-to-Antibody Ratio)의 격차가 발생하며...
-                </p>
-                <div class="pt-2">
-                    <button onclick="viewArticleDetail(1)" class="text-xs text-indigo-400 font-bold bg-indigo-950/40 px-4 py-2 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors cursor-pointer">전문 읽기 &rarr;</button>
+    <div id="articleListSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6">
+    <h2 class="text-lg sm:text-xl font-bold text-white border-b border-gray-800 pb-4 flex items-center gap-2.5">
+        <i class="fa-solid fa-feather text-indigo-400"></i> 바이오 리서치 전문 아티클
+    </h2>
+    
+    <div id="articlesContainer" class="space-y-4">
+        
+        <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(1)">
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                    <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-medium">ADC 분석</span>
+                    <span>•</span>
+                    <span>2026-06-13</span>
                 </div>
-            </article>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
+                    차세대 항체약물접합체(ADC)의 페이로드(Payload) 트렌드 분석
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                    기존 화학항암제 기반에서 최근 Exatecan, Deruxtecan 등 강력한 Topoisomerase I 억제제 페이로드로의 중심 이동이 뚜렷하게 관찰되고 있습니다. 이에 따른 바이오텍들의 파이프라인 경쟁력을 점검합니다.
+                </p>
+            </div>
+        </article>
 
-            <article class="p-5 bg-gray-950/50 rounded-xl border border-gray-800/60 space-y-3.5">
-                <h3 class="font-bold text-indigo-300 text-base sm:text-lg leading-snug hover:underline cursor-pointer" onclick="viewArticleDetail(2)">고형암 타깃 클라우딘(CLDN18.2) 항체 치료제 임상 동향</h3>
-                <p class="text-[11px] text-gray-400">등록일자: 2026-06-14</p>
-                <p class="text-sm text-gray-300 leading-relaxed line-clamp-3">
-                    위암 및 췌장암 등 난치성 고형암에서 클라우딘 18.2(Claudin-18.2)는 매우 매력적인 바이오마커로 자리 잡고 있습니다. 아스텔라스의 졸베툭시맙(Zolbetuximab)이 선두 주자로 임상 3상 데이터를 입증해 낸 이후...
-                </p>
-                <div class="pt-2">
-                    <button onclick="viewArticleDetail(2)" class="text-xs text-indigo-400 font-bold bg-indigo-950/40 px-4 py-2 rounded-lg border border-indigo-500/20 hover:bg-indigo-950/80 inline-block transition-colors cursor-pointer">전문 읽기 &rarr;</button>
+        <article class="p-5 rounded-lg bg-gray-900/40 border border-gray-800/60 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer group" onclick="showArticleDetail(2)">
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">임상 동향</span>
+                    <span>•</span>
+                    <span>2026-06-12</span>
                 </div>
-            </article>
-        </div>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-100 group-hover:text-indigo-400 transition-colors">
+                    글로벌 클라우딘18.2(CLDN18.2) 타깃 치료제 개발 현황과 전망
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                    난치성 고형암에서 높은 발현도를 보이는 CLDN18.2 모달리티의 글로벌 임상 데이터를 비교 분석하고, 향후 시장 진입 가능성이 높은 독보적인 플랫폼 기술을 가진 기업들을 살펴봅니다.
+                </p>
+            </div>
+        </article>
+
+    </div>
+</div>
 
         <div id="articleDetailSection" class="glass-panel p-6 sm:p-8 rounded-xl space-y-6 hidden">
             <button onclick="backToArticleList()" class="text-xs text-gray-400 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-2">
